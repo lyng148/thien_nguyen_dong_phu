@@ -11,4 +11,5 @@ public interface UserService extends BaseService<User, Long>, UserDetailsService
     void changePassword(Long id, String oldPassword, String newPassword);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+    User findAdminUser();
 } 

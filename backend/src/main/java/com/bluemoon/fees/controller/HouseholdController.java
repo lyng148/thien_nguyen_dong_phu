@@ -7,6 +7,7 @@ import com.bluemoon.fees.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -82,6 +83,7 @@ public class HouseholdController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Household> updateHousehold(@PathVariable Long id, @RequestBody Household household) {
         log.info("Updating household with id: {}", id);
         Household updated = householdService.updateHousehold(id, household);
@@ -90,6 +92,7 @@ public class HouseholdController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deactivateHousehold(@PathVariable Long id) {
         log.info("Handling delete request for household with id: {}", id);
         
@@ -113,6 +116,7 @@ public class HouseholdController {
     }
 
     @PutMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> activateHousehold(@PathVariable Long id) {
         log.info("Activating household with id: {}", id);
         householdService.activateHousehold(id);

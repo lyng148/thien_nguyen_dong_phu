@@ -1,8 +1,12 @@
 package com.bluemoon.fees.service.impl;
 
 import com.bluemoon.fees.entity.Payment;
+import com.bluemoon.fees.entity.Notification;
+import com.bluemoon.fees.entity.User;
 import com.bluemoon.fees.repository.PaymentRepository;
 import com.bluemoon.fees.service.PaymentService;
+import com.bluemoon.fees.service.NotificationService;
+import com.bluemoon.fees.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,8 @@ import java.util.Optional;
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final NotificationService notificationService;
+    private final UserService userService;
 
     @Override
     public Payment save(Payment entity) {
@@ -92,17 +98,40 @@ public class PaymentServiceImpl implements PaymentService {
         if (payment.getPaymentDate() == null) {
             payment.setPaymentDate(LocalDate.now());
         }
-        payment.setVerified(false);
+        
+        // Không tự động đặt payment.setVerified(false) nữa
+        // Để giữ nguyên giá trị verified từ frontend gửi lên
+        
         if (payment.getAmountPaid() == null) {
             payment.setAmountPaid(payment.getAmount());
         }
         
-        // Log the payment data for debugging
-        log.info("Creating payment with household ID: {}, fee ID: {}", 
-            payment.getHousehold() != null ? payment.getHousehold().getId() : "null",
-            payment.getFee() != null ? payment.getFee().getId() : "null");
+        Payment savedPayment = paymentRepository.save(payment);
         
-        return save(payment);
+        // Create notification for admin
+        User admin = userService.findAdminUser();
+        
+        // Tạo thông điệp an toàn với xử lý null
+        String householdInfo = "unknown";
+        if (payment.getHousehold() != null) {
+            if (payment.getHousehold().getOwnerName() != null) {
+                householdInfo = payment.getHousehold().getOwnerName();
+            } else if (payment.getHousehold().getId() != null) {
+                householdInfo = "ID: " + payment.getHousehold().getId();
+            }
+        }
+        
+        notificationService.createNotification(
+            "New Payment Received",
+            String.format("A new payment of %s has been received for household %s", 
+                payment.getAmount(), 
+                householdInfo),
+            Notification.EntityType.PAYMENT,
+            savedPayment.getId(),
+            admin
+        );
+        
+        return savedPayment;
     }
 
     @Override

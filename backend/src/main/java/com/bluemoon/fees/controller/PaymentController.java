@@ -122,6 +122,7 @@ public class PaymentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PaymentDTO> updatePayment(@PathVariable Long id, @RequestBody Payment payment) {
         Payment updatedPayment = paymentService.updatePayment(id, payment);
         // Fetch the updated payment with household and fee data to ensure they're fully loaded

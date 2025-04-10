@@ -12,15 +12,16 @@ import {
 } from '@mui/material';
 import { 
   Menu as MenuIcon, 
-  Notifications as NotificationsIcon,
   AccountCircle,
   ExitToApp
 } from '@mui/icons-material';
-import { getUserData } from '../../utils/auth';
+import { getUserData, isAdmin } from '../../utils/auth';
+import NotificationMenu from './NotificationMenu';
 
 const Navbar = ({ toggleSidebar, isSidebarOpen, onLogout }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const userData = getUserData();
+  const admin = isAdmin();
   
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -65,11 +66,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onLogout }) => {
         <Box sx={{ flexGrow: 1 }} />
 
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Tooltip title="Notifications">
-            <IconButton color="default" sx={{ mx: 1 }}>
-              <NotificationsIcon />
-            </IconButton>
-          </Tooltip>
+          {admin && <NotificationMenu />}
 
           <Box sx={{ ml: 2 }}>
             <IconButton onClick={handleMenu} size="small" sx={{ ml: 2 }}>

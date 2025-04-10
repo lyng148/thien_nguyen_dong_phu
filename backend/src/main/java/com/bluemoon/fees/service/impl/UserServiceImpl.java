@@ -135,4 +135,10 @@ public class UserServiceImpl implements UserService {
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
         );
     }
+
+    @Override
+    public User findAdminUser() {
+        return userRepository.findByRole("ADMIN")
+                .orElseThrow(() -> new RuntimeException("No admin user found"));
+    }
 } 

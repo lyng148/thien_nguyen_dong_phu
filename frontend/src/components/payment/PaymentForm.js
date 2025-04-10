@@ -25,11 +25,13 @@ import PageHeader from '../common/PageHeader';
 import { getPaymentById, createPayment, updatePayment } from '../../services/paymentService';
 import { getAllHouseholds } from '../../services/householdService';
 import { getAllFees } from '../../services/feeService';
+import { isAdmin } from '../../utils/auth';
 
 const PaymentForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
+  const admin = isAdmin();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -176,7 +178,7 @@ const PaymentForm = () => {
         amount: parseFloat(formData.amount),
         amountPaid: parseFloat(formData.amountPaid || formData.amount),
         paymentDate: formData.paymentDate,
-        verified: formData.verified,
+        verified: admin ? formData.verified : false,
         notes: formData.notes || ''
       };
       
@@ -187,7 +189,7 @@ const PaymentForm = () => {
         setSuccess('Payment updated successfully');
       } else {
         await createPayment(paymentData);
-        setSuccess('Payment created successfully');
+        setSuccess('Payment created successfully' + (!admin ? ' (Pending verification)' : ''));
       }
       
       // Redirect after successful save
@@ -352,12 +354,17 @@ const PaymentForm = () => {
                         name="verified"
                         checked={formData.verified}
                         onChange={handleChange}
-                        disabled={saving}
+                        disabled={saving || !admin}
                         color="success"
                       />
                     }
                     label="Verified"
                   />
+                  {!admin && (
+                    <Alert severity="info" sx={{ mt: 1 }}>
+                      Your payment will need to be verified by an administrator before it becomes active.
+                    </Alert>
+                  )}
                 </Grid>
               </Grid>
               

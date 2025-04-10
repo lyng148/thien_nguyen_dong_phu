@@ -17,11 +17,13 @@ import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-materia
 
 import PageHeader from '../common/PageHeader';
 import { getHouseholdById, createHousehold, updateHousehold } from '../../services/householdService';
+import { isAdmin } from '../../utils/auth';
 
 const HouseholdForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
+  const admin = isAdmin();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -30,7 +32,7 @@ const HouseholdForm = () => {
     numMembers: 1,
     phoneNumber: '',
     email: '',
-    active: true
+    active: admin // Only set active to true by default if user is admin
   });
   
   // UI state
@@ -99,7 +101,8 @@ const HouseholdForm = () => {
       // Make sure numMembers is an integer
       const householdData = {
         ...formData,
-        numMembers: parseInt(formData.numMembers, 10)
+        numMembers: parseInt(formData.numMembers, 10),
+        active: admin ? formData.active : false // Force inactive if not admin
       };
       
       console.log('Submitting household data:', householdData);
@@ -114,7 +117,7 @@ const HouseholdForm = () => {
         console.log('Creating new household');
         result = await createHousehold(householdData);
         console.log('Household created successfully:', result);
-        setSuccess('Household created successfully');
+        setSuccess('Household created successfully' + (!admin ? ' (Pending approval)' : ''));
       }
       
       // Redirect after successful save
@@ -237,12 +240,17 @@ const HouseholdForm = () => {
                         name="active"
                         checked={formData.active}
                         onChange={handleChange}
-                        disabled={saving}
+                        disabled={saving || !admin} // Disable for non-admin users
                         color="success"
                       />
                     }
                     label="Active"
                   />
+                  {!admin && (
+                    <Alert severity="info" sx={{ mt: 1 }}>
+                      Your household submission will require approval by an administrator before it becomes active.
+                    </Alert>
+                  )}
                 </Grid>
               </Grid>
               

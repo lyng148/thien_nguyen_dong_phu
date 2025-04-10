@@ -1,8 +1,12 @@
 package com.bluemoon.fees.service.impl;
 
 import com.bluemoon.fees.entity.Household;
+import com.bluemoon.fees.entity.Notification;
+import com.bluemoon.fees.entity.User;
 import com.bluemoon.fees.repository.HouseholdRepository;
 import com.bluemoon.fees.service.HouseholdService;
+import com.bluemoon.fees.service.NotificationService;
+import com.bluemoon.fees.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +20,8 @@ import java.util.Optional;
 public class HouseholdServiceImpl implements HouseholdService {
 
     private final HouseholdRepository householdRepository;
+    private final UserService userService;
+    private final NotificationService notificationService;
 
     @Override
     public Household save(Household entity) {
@@ -75,8 +81,26 @@ public class HouseholdServiceImpl implements HouseholdService {
 
     @Override
     public Household createHousehold(Household household) {
-        household.setActive(true);
-        return save(household);
+        // Không tự động đặt household.setActive(true) nữa
+        // Để giữ nguyên giá trị active từ frontend gửi lên
+        Household savedHousehold = householdRepository.save(household);
+        
+        // Create notification for admin
+        User admin = userService.findAdminUser();
+        
+        // Đảm bảo thông tin household an toàn
+        String householdName = household.getOwnerName() != null ? 
+            household.getOwnerName() : "household #" + savedHousehold.getId();
+        
+        notificationService.createNotification(
+            "New Household Added",
+            String.format("A new household '%s' has been added", householdName),
+            Notification.EntityType.HOUSEHOLD,
+            savedHousehold.getId(),
+            admin
+        );
+        
+        return savedHousehold;
     }
 
     @Override

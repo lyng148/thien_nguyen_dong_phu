@@ -186,9 +186,9 @@ const FeeList = () => {
       <PageHeader 
         title="Fees" 
         subtitle="Manage apartment fees and payment schedules"
-        actionText={admin ? "Add Fee" : undefined}
-        actionIcon={admin ? <AddIcon /> : undefined}
-        onActionClick={admin ? () => navigate('/fees/add') : undefined}
+        actionText="Add Fee"
+        actionIcon={<AddIcon />}
+        onActionClick={() => navigate('/fees/add')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
           { label: 'Fees' }

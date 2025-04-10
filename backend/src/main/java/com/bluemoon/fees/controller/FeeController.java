@@ -55,7 +55,6 @@ public class FeeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Fee> createFee(@RequestBody Fee fee) {
         return ResponseEntity.ok(feeService.createFee(fee));
     }

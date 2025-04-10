@@ -1,8 +1,12 @@
 package com.bluemoon.fees.service.impl;
 
 import com.bluemoon.fees.entity.Fee;
+import com.bluemoon.fees.entity.Notification;
+import com.bluemoon.fees.entity.User;
 import com.bluemoon.fees.repository.FeeRepository;
 import com.bluemoon.fees.service.FeeService;
+import com.bluemoon.fees.service.NotificationService;
+import com.bluemoon.fees.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +21,8 @@ import java.util.Optional;
 public class FeeServiceImpl implements FeeService {
 
     private final FeeRepository feeRepository;
+    private final NotificationService notificationService;
+    private final UserService userService;
 
     @Override
     public Fee save(Fee entity) {
@@ -81,8 +87,26 @@ public class FeeServiceImpl implements FeeService {
 
     @Override
     public Fee createFee(Fee fee) {
-        fee.setActive(true);
-        return save(fee);
+        // Không tự động đặt fee.setActive(true) nữa
+        // Để giữ nguyên giá trị active từ frontend gửi lên
+        Fee savedFee = feeRepository.save(fee);
+        
+        // Create notification for admin
+        User admin = userService.findAdminUser();
+        
+        // Đảm bảo thông tin fee an toàn
+        String feeName = fee.getName() != null ? fee.getName() : "Unknown";
+        String feeAmount = fee.getAmount() != null ? fee.getAmount().toString() : "N/A";
+        
+        notificationService.createNotification(
+            "New Fee Created",
+            String.format("A new fee '%s' has been created with amount %s", feeName, feeAmount),
+            Notification.EntityType.FEE,
+            savedFee.getId(),
+            admin
+        );
+        
+        return savedFee;
     }
 
     @Override

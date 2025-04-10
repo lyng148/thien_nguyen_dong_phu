@@ -30,13 +30,6 @@ const FeeForm = () => {
   const isEdit = Boolean(id);
   const admin = isAdmin();
   
-  // If user is not admin, redirect to fees list
-  useEffect(() => {
-    if (!admin) {
-      navigate('/fees');
-    }
-  }, [admin, navigate]);
-  
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -44,7 +37,7 @@ const FeeForm = () => {
     amount: '',
     dueDate: '',
     description: '',
-    active: true
+    active: admin // Only set active to true by default if user is admin
   });
   
   // UI state
@@ -121,7 +114,7 @@ const FeeForm = () => {
         amount: parseFloat(formData.amount),
         dueDate: formData.dueDate,
         description: formData.description,
-        active: formData.active
+        active: admin ? formData.active : false // Force inactive if not admin
       };
       
       let result;
@@ -132,7 +125,7 @@ const FeeForm = () => {
       } else {
         result = await createFee(feeData);
         console.log('Fee created successfully:', result);
-        setSuccess('Fee created successfully');
+        setSuccess('Fee created successfully' + (!admin ? ' (Pending approval)' : ''));
       }
       
       // Redirect after successful save
@@ -288,12 +281,17 @@ const FeeForm = () => {
                         name="active"
                         checked={formData.active}
                         onChange={handleChange}
-                        disabled={saving}
+                        disabled={saving || !admin} // Disable for non-admin users
                         color="success"
                       />
                     }
                     label="Active"
                   />
+                  {!admin && (
+                    <Alert severity="info" sx={{ mt: 1 }}>
+                      Your fee submission will require approval by an administrator.
+                    </Alert>
+                  )}
                 </Grid>
               </Grid>
               
