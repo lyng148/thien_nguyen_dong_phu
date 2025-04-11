@@ -237,11 +237,7 @@ const FeeForm = () => {
                     value={formData.amount}
                     onChange={handleNumberChange}
                     fullWidth
-                    required
                     disabled={saving}
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                    }}
                   />
                 </Grid>
                 
@@ -274,25 +270,29 @@ const FeeForm = () => {
                   />
                 </Grid>
                 
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        name="active"
-                        checked={formData.active}
-                        onChange={handleChange}
-                        disabled={saving || !admin} // Disable for non-admin users
-                        color="success"
-                      />
-                    }
-                    label="Active"
-                  />
-                  {!admin && (
+                {admin && (
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          name="isActive"
+                          checked={formData.isActive}
+                          onChange={handleChange}
+                          disabled={saving}
+                          color="success"
+                        />
+                      }
+                      label="Active"
+                    />
+                  </Grid>
+                )}
+                {!admin && (
+                  <Grid item xs={12}>
                     <Alert severity="info" sx={{ mt: 1 }}>
                       Your fee submission will require approval by an administrator.
                     </Alert>
-                  )}
-                </Grid>
+                  </Grid>
+                )}
               </Grid>
               
               <Divider sx={{ my: 3 }} />

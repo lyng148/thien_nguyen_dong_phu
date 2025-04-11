@@ -291,13 +291,9 @@ const PaymentForm = () => {
                     name="amount"
                     type="number"
                     value={formData.amount}
-                    onChange={handleNumberChange}
+                    onChange={handleChange}
                     fullWidth
-                    required
                     disabled={saving}
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                    }}
                   />
                 </Grid>
                 
@@ -347,25 +343,29 @@ const PaymentForm = () => {
                   />
                 </Grid>
                 
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        name="verified"
-                        checked={formData.verified}
-                        onChange={handleChange}
-                        disabled={saving || !admin}
-                        color="success"
-                      />
-                    }
-                    label="Verified"
-                  />
-                  {!admin && (
+                {admin && (
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          name="verified"
+                          checked={formData.verified}
+                          onChange={handleChange}
+                          disabled={saving}
+                          color="success"
+                        />
+                      }
+                      label="Verified"
+                    />
+                  </Grid>
+                )}
+                {!admin && (
+                  <Grid item xs={12}>
                     <Alert severity="info" sx={{ mt: 1 }}>
-                      Your payment will need to be verified by an administrator before it becomes active.
+                      Your payment will require verification by an administrator.
                     </Alert>
-                  )}
-                </Grid>
+                  </Grid>
+                )}
               </Grid>
               
               <Divider sx={{ my: 3 }} />
